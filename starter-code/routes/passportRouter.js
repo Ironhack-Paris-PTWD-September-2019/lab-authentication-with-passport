@@ -1,17 +1,44 @@
 const express        = require("express");
 const passportRouter = express.Router();
 // Require user model
+const User = require(`../models/user`);
 
 // Add bcrypt to encrypt passwords
+const bcrypt = require(`bcrypt`);
+const bcryptSalt = 10;
+const salt = bcrypt.genSaltSync(bcryptSalt);
 
 // Add passport 
+const passport = require(`passport`);
 
+passportRouter.get(`/signup`, (req,res,next) => {
+  res.render(`passport/signup`);
+});
 
-const ensureLogin = require("connect-ensure-login");
+passportRouter.post(`/signup`, (req,res,next) => {
+  const { username, password } = req.body;
 
+  if(username.length <= 0 || password.length <= 0) {
+    res.render(`passport/signup`, {
+      errorMessage: `Please fill both username and password`
+    });
+    return;
+  }
+  
+  const hashPass = bcrypt.hashSync(password, salt);
 
-passportRouter.get("/private-page", ensureLogin.ensureLoggedIn(), (req, res) => {
-  res.render("passport/private", { user: req.user });
+  User.create({
+    username,
+    password: hashPass
+  })
+    .then(
+      res.redirect(`/`)
+    )
+    .catch(err => next(err));
+});
+
+passportRouter.get(`/private-page`, (req, res) => {
+  res.render(`passport/private`, { user: req.user });
 });
 
 module.exports = passportRouter;
