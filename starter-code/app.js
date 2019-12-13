@@ -1,18 +1,19 @@
 require('dotenv').config();
 
-const bodyParser   = require('body-parser');
-const cookieParser = require('cookie-parser');
-const express      = require('express');
-const favicon      = require('serve-favicon');
-const hbs          = require('hbs');
-const mongoose     = require('mongoose');
-const logger       = require('morgan');
-const path         = require('path');
-const session      = require(`express-session`);
-const MongoStore   = require(`connect-mongo`)(session);
-const bcrypt       = require("bcrypt");
-const passport     = require(`passport`);
+const bodyParser    = require('body-parser');
+const cookieParser  = require('cookie-parser');
+const express       = require('express');
+const favicon       = require('serve-favicon');
+const hbs           = require('hbs');
+const mongoose      = require('mongoose');
+const logger        = require('morgan');
+const path          = require('path');
+const session       = require(`express-session`);
+const MongoStore    = require(`connect-mongo`)(session);
+const bcrypt        = require("bcrypt");
+const passport      = require(`passport`);
 const LocalStrategy = require("passport-local").Strategy;
+const User          = require(`./models/user`);
 
 mongoose
   .connect('mongodb://localhost/lab-auth-with-passport', {useNewUrlParser: true})
