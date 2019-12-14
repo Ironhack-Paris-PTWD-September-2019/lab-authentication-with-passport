@@ -12,7 +12,9 @@ const session       = require(`express-session`);
 const MongoStore    = require(`connect-mongo`)(session);
 const bcrypt        = require("bcrypt");
 const passport      = require(`passport`);
-const LocalStrategy = require("passport-local").Strategy;
+const LocalStrategy = require(`passport-local`).Strategy;
+const SlackStrategy = require(`passport-slack`).Strategy;
+const GoogleStrategy = require(`passport-google-oauth20`).Strategy;
 const User          = require(`./models/user`);
 
 mongoose
@@ -55,29 +57,97 @@ passport.deserializeUser((id, cb) => {
   ;
 });
 
-passport.use(new LocalStrategy(
-  {passReqToCallback: true},
-  (...args) => {
-    const [req,,, done] = args;
+passport.use(
+  new LocalStrategy(
+    {passReqToCallback: true},
+    (...args) => {
+      const [req,,, done] = args;
 
-    const {username, password} = req.body;
+      const {username, password} = req.body;
 
-    User.findOne({username})
-      .then(user => {
-        if (!user) {
-          return done(null, false, { message: "Incorrect username" });
-        }
-          
-        if (!bcrypt.compareSync(password, user.password)) {
-          return done(null, false, { message: "Incorrect password" });
-        }
-    
-        done(null, user);
-      })
-      .catch(err => done(err))
-    ;
-  }
-));
+      User.findOne({username})
+        .then(user => {
+          if (!user) {
+            return done(null, false, { message: "Incorrect username" });
+          }
+            
+          if (!bcrypt.compareSync(password, user.password)) {
+            return done(null, false, { message: "Incorrect password" });
+          }
+      
+          done(null, user);
+        })
+        .catch(err => done(err))
+      ;
+    }
+  )
+);
+
+passport.use(
+  new SlackStrategy(
+    {
+      clientID: process.env.SLACK_CLIENT_ID,
+      clientSecret: process.env.SLACK_CLIENT_SECRET,
+      callbackURL: "/auth/slack/callback"
+    },
+    (accessToken, refreshToken, profile, done) => {
+      // to see the structure of the data in received response:
+      console.log("Slack account details:", profile);
+
+      User.findOne({ slackID: profile.id })
+        .then(user => {
+          // If found, login with that user:
+          if (user) {
+            done(null, user);
+            return;
+          }
+
+          // Otherwise, create that new user:
+          User.create({ slackID: profile.id })
+            .then(newUser => {
+              done(null, newUser);
+            })
+            .catch(err => done(err))
+          ;
+        })
+        .catch(err => done(err))
+      ;
+    }
+  )
+);
+
+passport.use(
+  new GoogleStrategy(
+    {
+      clientID: process.env.GOOGLE_CLIENT_ID,
+      clientSecret: process.env.GOOGLE_CLIENT_SECRET,
+      callbackURL: "/auth/google/callback"
+    },
+    (accessToken, refreshToken, profile, done) => {
+      // to see the structure of the data in received response:
+      console.log("Google account details:", profile);
+
+      User.findOne({ googleID: profile.id })
+        .then(user => {
+          // If found, login with that user:
+          if (user) {
+            done(null, user);
+            return;
+          }
+
+          // Otherwise, create that new user:
+          User.create({ googleID: profile.id })
+            .then(newUser => {
+              done(null, newUser);
+            })
+            .catch(err => done(err))
+          ;
+        })
+        .catch(err => done(err))
+      ;
+    }
+  )
+);
 
 // Express View engine setup
 

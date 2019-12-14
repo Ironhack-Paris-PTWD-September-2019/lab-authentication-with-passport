@@ -38,13 +38,36 @@ passportRouter.post(`/signup`, (req,res,next) => {
 });
 
 passportRouter.get(`/login`, (req,res,next) => {
-  res.render(`passport/login`)
+  if(req.user) {
+    res.redirect(`/private-page`)
+  } else {
+    res.render(`passport/login`)
+  }
 });
 
 passportRouter.post(`/login`, passport.authenticate(`local`, {
   successRedirect: `/private-page`,
   failureRedirect: `/login`
 }));
+
+passportRouter.get(`/auth/slack`, passport.authenticate(`slack`));
+
+passportRouter.get(`/auth/slack/callback`, passport.authenticate(`slack`, {
+  successRedirect: `/private-page`,
+  failureRedirect: `/login`
+}));
+
+passportRouter.get(`/auth/google`, passport.authenticate(`google`, {
+  scope: [
+    "https://www.googleapis.com/auth/userinfo.profile",
+    "https://www.googleapis.com/auth/userinfo.email"
+  ]
+}));
+
+passportRouter.get(`/auth/google/callback`, passport.authenticate(`google`, {
+  successRedirect: `/private-page`,
+  failureRedirect: `/login`
+}))
 
 passportRouter.get(`/private-page`, (req, res) => {
   if(!req.user) {

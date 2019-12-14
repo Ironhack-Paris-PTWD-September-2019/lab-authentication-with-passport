@@ -52,4 +52,45 @@ a {
   padding: 20px;
   width: 100%; }
 
+.account-message, .alternate-login {
+  text-align: center; }
+
+#slackButton {
+  background: #57B77F;
+  border: 1px solid #57B77F;
+  border-radius: 4px;
+  color: #fff;
+  cursor: pointer;
+  display: inline-block;
+  font-size: 14px;
+  padding: 8px 16px;
+  text-decoration: none;
+  text-transform: uppercase;
+  transition: .3s ease background;
+  text-align: center; }
+
+#slackButton:hover {
+  background: #fff;
+  color: #57B77F;
+  transition: .3s ease background; }
+
+#googleButton {
+  background: #4286F4;
+  border: 1px solid #4286F4;
+  border-radius: 4px;
+  color: #fff;
+  cursor: pointer;
+  display: inline-block;
+  font-size: 14px;
+  padding: 8px 16px;
+  text-decoration: none;
+  text-transform: uppercase;
+  transition: .3s ease background;
+  text-align: center; }
+
+#googleButton:hover {
+  background: #fff;
+  color: #4286F4;
+  transition: .3s ease background; }
+
 /*# sourceMappingURL=style.css.map */
